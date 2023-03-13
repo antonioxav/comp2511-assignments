@@ -93,6 +93,8 @@ int get_cmd_line(char *cmdline);
 // 
 void read_tokens(char **argv, char *line, int *numTokens, char *token);
 
+void print_arr(char **arr, int n);
+
 
 /* The main function implementation */
 int main()
@@ -132,7 +134,32 @@ int main()
 void process_cmd(char *cmdline)
 {
     // Un-comment this line if you want to know what is cmdline input parameter
-    // printf("The input cmdline is: %s\n", cmdline);
+    printf("The input cmdline is: %s\n", cmdline);
+
+    // * Get Pipe segments
+    char *pipe_segments[MAX_PIPE_SEGMENTS];
+    int num_pipe_segments;
+    read_tokens(pipe_segments, cmdline, &num_pipe_segments, PIPE_CHAR);
+    // print_arr(pipe_segments, num_pipe_segments);
+    
+    // * Start pipe loop
+    for (int i=0;i<num_pipe_segments;i++){
+        // * Get arguments
+        char *cmd_args[MAX_ARGUMENTS];
+        int num_args;
+        read_tokens(cmd_args, pipe_segments[i], &num_args, SPACE_CHARS);
+        // print_arr(cmd_args, num_args);
+
+        // * add NULL for exp args
+        char *arguments[MAX_ARGUMENTS_PER_SEGMENT];
+        for (int a=0; a<num_args; a++){
+            strcpy(arguments[a], cmd_args[a]);
+        }
+        arguments[num_args] = NULL;
+
+        
+    }
+
 
     // TODO: Write your program to handle the command
 }
@@ -156,7 +183,7 @@ void show_prompt()
     // TODO: replace the shell prompt with your ITSC account name
     // For example, if you ITSC account is cspeter@connect.ust.hk
     // You should replace ITSC with cspeter
-    printf("ITSC> ");
+    printf("ssaxenaad> ");
 }
 
 // Implementation of get_cmd_line
@@ -178,4 +205,11 @@ int get_cmd_line(char *cmdline)
         return -1;
     }
     return 0;
+}
+
+void print_arr(char **arr, int n){
+    for(int i = 0; i < n; i++){
+        printf(arr[i]);
+        printf("`\n");
+    }
 }
