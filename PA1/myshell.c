@@ -2,8 +2,8 @@
     COMP3511 Spring 2023 
     PA1: Simplified Linux Shell (myshell)
 
-    Your name:
-    Your ITSC email:           @connect.ust.hk 
+    Your name: Srijan Saxena
+    Your ITSC email: ssaxenaad@connect.ust.hk 
 
     Declaration:
 
@@ -135,29 +135,72 @@ void process_cmd(char *cmdline)
 {
     // Un-comment this line if you want to know what is cmdline input parameter
     printf("The input cmdline is: %s\n", cmdline);
+    int status;
 
     // * Get Pipe segments
     char *pipe_segments[MAX_PIPE_SEGMENTS];
     int num_pipe_segments;
     read_tokens(pipe_segments, cmdline, &num_pipe_segments, PIPE_CHAR);
-    // print_arr(pipe_segments, num_pipe_segments);
+    print_arr(pipe_segments, num_pipe_segments);
     
+    int prev_pfds[2]; // previous pipe
+    int next_pfds[2]; // next pipe
     // * Start pipe loop
     for (int i=0;i<num_pipe_segments;i++){
-        // * Get arguments
-        char *cmd_args[MAX_ARGUMENTS];
-        int num_args;
-        read_tokens(cmd_args, pipe_segments[i], &num_args, SPACE_CHARS);
-        // print_arr(cmd_args, num_args);
+        /*
+            ? Fork a child for each pipe segment
+            ? Create a pipe for each segment. Pipe conects child to child. 
+            ? Pipe created by parent.
+            ? Pipe is created only if i!=(num_pipe_segments-1)
+            ? Within child, i!=0, stdin is replaced with pfds[0]
+            ? Within child, i!=(num_pipe_segments-1), stdout is replaced with pfds[1]
+            ? Tokenize command and execute
+        */
 
-        // * add NULL for exp args
-        char *arguments[MAX_ARGUMENTS_PER_SEGMENT];
-        for (int a=0; a<num_args; a++){
-            strcpy(arguments[a], cmd_args[a]);
+        // * Create next pipe if segment is not last pipe segment
+        if (i!=(num_pipe_segments-1)) pipe(next_pfds);
+
+        // * Create child to execute segment
+        pid_t child_pid = fork();
+
+        if (child_pid==-1){
+            printf("child no create");
         }
-        arguments[num_args] = NULL;
+        else if (child_pid==0){
+            // * replace stdin with prev_pfds[0] for multiple pipes
+            if (i!=0) {
+                close(0); // Close stdin
+                dup2(prev_pfds[0],0); // set read of prev_pipe as stdin
+                close(prev_pfds[1]); // don't need write of prev_pipe
+            }
+            
+            // * replace stdout with next_pfds[1] for all except last pipe
+            if (i!=(num_pipe_segments-1)){
+                close(1); // Close stdout
+                dup2(next_pfds[1],1); // set write of next_pipe as stdout
+                close(next_pfds[0]); // don't need read of next_pipe
+            }
 
-        
+            // * Get arguments
+            char *cmd_args[MAX_ARGUMENTS];
+            int num_args;
+            read_tokens(cmd_args, pipe_segments[i], &num_args, SPACE_CHARS);
+            // print_arr(cmd_args, num_args);
+
+            // * add NULL for exp args
+            char *arguments[MAX_ARGUMENTS_PER_SEGMENT];
+            for (int a=0; a<num_args; a++){
+                strcpy(arguments[a], cmd_args[a]);
+            }
+            arguments[num_args] = NULL;
+
+            execvp(arguments[0],arguments);
+            // printf("%s failed",arguments[0]);
+        }
+        else {
+            wait(&status);
+            printf("%i",status);
+        }
     }
 
 
