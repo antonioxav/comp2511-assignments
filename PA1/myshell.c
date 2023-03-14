@@ -174,6 +174,7 @@ void process_cmd(char *cmdline)
                 dup2(prev_pfds[0],STDIN_FILENO); // set read of prev_pipe as stdin
                 close(prev_pfds[1]); // don't need write of prev_pipe
             }
+            else printf("Next Pipe in child: %i, %i \n", next_pfds[0], next_pfds[1]);
             
             // * replace stdout with next_pfds[1] for all except last pipe
             if (i!=(num_pipe_segments-1)){
@@ -181,6 +182,7 @@ void process_cmd(char *cmdline)
                 dup2(next_pfds[1],STDOUT_FILENO); // set write of next_pipe as stdout
                 close(next_pfds[0]); // don't need read of next_pipe
             }
+            else printf("Previous Pipe in child: %i, %i \n", prev_pfds[0], prev_pfds[1]);
 
             // * Get arguments
             char *cmd_args[MAX_ARGUMENTS];
@@ -204,7 +206,10 @@ void process_cmd(char *cmdline)
 
             printf("Previous Pipe: %i, %i \n", prev_pfds[0], prev_pfds[1]);
             printf("Next Pipe: %i, %i \n", next_pfds[0], next_pfds[1]);
-            
+            if (i!=0){
+                close(prev_pfds[0]);
+                close(prev_pfds[1]);
+            }
             prev_pfds[0] = next_pfds[0];
             prev_pfds[1] = next_pfds[1];
             wait(&status);
