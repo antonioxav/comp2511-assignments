@@ -139,14 +139,14 @@ int main()
 void process_cmd(char *cmdline)
 {
     // Un-comment this line if you want to know what is cmdline input parameter
-    printf("The input cmdline is: %s\n", cmdline);
+    // printf("The input cmdline is: %s\n", cmdline);
     int status;
 
     // * Get Pipe segments
     char *pipe_segments[MAX_PIPE_SEGMENTS];
     int num_pipe_segments;
     read_tokens(pipe_segments, cmdline, &num_pipe_segments, PIPE_CHAR);
-    print_arr(pipe_segments, num_pipe_segments);
+    // print_arr(pipe_segments, num_pipe_segments);
     
 
     // * check input and output files
@@ -197,9 +197,9 @@ void process_cmd(char *cmdline)
         }
     }
 
-    printf("input file: %s\n", input_file);
-    printf("output file: %s\n", output_file);
-    printf("pipe segment: %s\n", pipe_segments[0]);
+    // printf("input file: %s\n", input_file);
+    // printf("output file: %s\n", output_file);
+    // printf("pipe segment: %s\n", pipe_segments[0]);
 
     int inputfd;
     if (input_file!=NULL){
@@ -224,7 +224,7 @@ void process_cmd(char *cmdline)
     // * Start pipe loop
     int i;
     for (i=0; i<num_pipe_segments - 1; i++){
-        printf("Segment num: %i\n", i);
+        // printf("Segment num: %i\n", i);
         /*
             ? Fork a child for each pipe segment
             ? Create a pipe for each segment. Pipe conects child to child. 
@@ -260,8 +260,8 @@ void process_cmd(char *cmdline)
         else {
             //* make next_pipe the prev_pipe
 
-            printf("Previous Pipe: %i, %i \n", prev_pfds[0], prev_pfds[1]);
-            printf("Next Pipe: %i, %i \n", next_pfds[0], next_pfds[1]);
+            // printf("Previous Pipe: %i, %i \n", prev_pfds[0], prev_pfds[1]);
+            // printf("Next Pipe: %i, %i \n", next_pfds[0], next_pfds[1]);
             if (i!=0){
                 close(prev_pfds[0]);
                 close(prev_pfds[1]);
@@ -269,7 +269,7 @@ void process_cmd(char *cmdline)
             prev_pfds[0] = next_pfds[0];
             prev_pfds[1] = next_pfds[1];
             wait(&status);
-            printf("%i\n",status);
+            // printf("%i\n",status);
         }
     }
     // * connect to prev pipe if applicable
