@@ -93,10 +93,11 @@ int get_cmd_line(char *cmdline);
 // 
 void read_tokens(char **argv, char *line, int *numTokens, char *token);
 
-void print_arr(char **arr, int n);
-
 void execute_segment(char* segment);
 
+void set_input(int segment_num, int* prev_pfds, int inputfd);
+
+void print_arr(char **arr, int n);
 
 /* The main function implementation */
 int main()
@@ -148,8 +149,15 @@ void process_cmd(char *cmdline)
     int prev_pfds[2]; // previous pipe
     int next_pfds[2]; // next pipe
 
+    // ? Set input file for first command
+    int inputfd = STDIN_FILENO;
+
+    // ? Set output file for last command
+    int outputfd = STDOUT_FILENO;
+
     // * Start pipe loop
-    for (int i=0;i<num_pipe_segments;i++){
+    int i;
+    for (i=0; i<num_pipe_segments - 1; i++){
         printf("Segment num: %i\n", i);
         /*
             ? Fork a child for each pipe segment
@@ -162,9 +170,7 @@ void process_cmd(char *cmdline)
         */
 
         // * Create next pipe if segment is not last pipe segment
-        if (i!=(num_pipe_segments-1)){
-            pipe(next_pfds);
-        }
+        int pipe_status = pipe(next_pfds);
 
         // * Create child to execute segment
         pid_t child_pid = fork();
@@ -173,21 +179,15 @@ void process_cmd(char *cmdline)
             printf("child no create");
         }
         else if (child_pid==0){
-            // * replace stdin with prev_pfds[0] for multiple pipes
-            if (i!=0) {
-                close(STDIN_FILENO); // Close stdin
-                dup2(prev_pfds[0],STDIN_FILENO); // set read of prev_pipe as stdin
-                close(prev_pfds[1]); // don't need write of prev_pipe
-            }
-            else printf("Next Pipe in child: %i, %i \n", next_pfds[0], next_pfds[1]);
+            // * replace stdin with prev_pfds[0] for middle pipes
+            set_input(i, prev_pfds, inputfd);
             
             // * replace stdout with next_pfds[1] for all except last pipe
-            if (i!=(num_pipe_segments-1)){
-                close(STDOUT_FILENO); // Close stdout
-                dup2(next_pfds[1],STDOUT_FILENO); // set write of next_pipe as stdout
-                close(next_pfds[0]); // don't need read of next_pipe
-            }
-            else printf("Previous Pipe in child: %i, %i \n", prev_pfds[0], prev_pfds[1]);
+            close(STDOUT_FILENO); // Close stdout
+            dup2(next_pfds[1],STDOUT_FILENO); // set write of next_pipe as stdout
+            close(next_pfds[0]); // don't need read of next_pipe
+            
+            // printf("Previous Pipe in child: %i, %i \n", prev_pfds[0], prev_pfds[1]);
 
             execute_segment(pipe_segments[i]);
         }
@@ -206,9 +206,15 @@ void process_cmd(char *cmdline)
             printf("%i\n",status);
         }
     }
-
-
-    // TODO: Write your program to handle the command
+    // * connect to prev pipe if applicable
+    set_input(i, prev_pfds, inputfd);
+    // * Replace stdout for last command if applicable
+    if (outputfd!=STDOUT_FILENO){
+        close(STDOUT_FILENO);
+        dup2(outputfd, STDOUT_FILENO);
+    }
+    // * execute last command
+    execute_segment(pipe_segments[num_pipe_segments-1]);
 }
 
 // Implementation of read_tokens function
@@ -278,4 +284,18 @@ void execute_segment(char* segment){
 
     execvp(arguments[0],arguments);
     // printf("%s failed",arguments[0]);
+}
+
+void set_input(int segment_num, int* prev_pfds, int inputfd){
+    if (segment_num!=0) {
+        close(STDIN_FILENO); // Close stdin
+        dup2(prev_pfds[0],STDIN_FILENO); // set read of prev_pipe as stdin
+        close(prev_pfds[1]); // don't need write of prev_pipe
+    }
+    // * replace stdin in input specified
+    else if (inputfd!=STDIN_FILENO){
+        close(STDIN_FILENO);
+        dup2(inputfd, STDIN_FILENO);
+    }
+    // else printf("Next Pipe in child: %i, %i \n", next_pfds[0], next_pfds[1]);
 }
