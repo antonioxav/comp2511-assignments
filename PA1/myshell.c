@@ -147,6 +147,7 @@ void process_cmd(char *cmdline)
     int next_pfds[2]; // next pipe
     // * Start pipe loop
     for (int i=0;i<num_pipe_segments;i++){
+        printf("Segment num: %i\n", i);
         /*
             ? Fork a child for each pipe segment
             ? Create a pipe for each segment. Pipe conects child to child. 
@@ -169,15 +170,15 @@ void process_cmd(char *cmdline)
         else if (child_pid==0){
             // * replace stdin with prev_pfds[0] for multiple pipes
             if (i!=0) {
-                close(0); // Close stdin
-                dup2(prev_pfds[0],0); // set read of prev_pipe as stdin
+                close(STDIN_FILENO); // Close stdin
+                dup2(prev_pfds[0],STDIN_FILENO); // set read of prev_pipe as stdin
                 close(prev_pfds[1]); // don't need write of prev_pipe
             }
             
             // * replace stdout with next_pfds[1] for all except last pipe
             if (i!=(num_pipe_segments-1)){
-                close(1); // Close stdout
-                dup2(next_pfds[1],1); // set write of next_pipe as stdout
+                close(STDOUT_FILENO); // Close stdout
+                dup2(next_pfds[1],STDOUT_FILENO); // set write of next_pipe as stdout
                 close(next_pfds[0]); // don't need read of next_pipe
             }
 
@@ -199,6 +200,13 @@ void process_cmd(char *cmdline)
             // printf("%s failed",arguments[0]);
         }
         else {
+            //* make next_pipe the prev_pipe
+
+            printf("Previous Pipe: %i, %i \n", prev_pfds[0], prev_pfds[1]);
+            printf("Next Pipe: %i, %i \n", next_pfds[0], next_pfds[1]);
+            
+            prev_pfds[0] = next_pfds[0];
+            prev_pfds[1] = next_pfds[1];
             wait(&status);
             printf("%i\n",status);
         }
