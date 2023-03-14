@@ -35,6 +35,8 @@
 
 // The pipe character
 #define PIPE_CHAR "|"
+// #define INPUT_CHAR '<'
+// #define OUTPUT_CHAR '>'
 
 // Assume that we only have at most 8 pipe segements, 
 // and each segment has at most 256 characters
@@ -146,14 +148,78 @@ void process_cmd(char *cmdline)
     read_tokens(pipe_segments, cmdline, &num_pipe_segments, PIPE_CHAR);
     print_arr(pipe_segments, num_pipe_segments);
     
-    int prev_pfds[2]; // previous pipe
-    int next_pfds[2]; // next pipe
 
-    // ? Set input file for first command
-    int inputfd = STDIN_FILENO;
+    // * check input and output files
+    char* input_file = NULL;
+    char* output_file = NULL;
+    // ! assuming io only in first command
+    if (num_pipe_segments=1){
+        // ** check for input specification
+        if (strchr(pipe_segments[0], '<')){
+            // ** split based on <
+            char* cmd_segments_in[2]; // ! Assuming at most 1 input request
+            int num_cmd_segments_in;
+            read_tokens(cmd_segments_in, pipe_segments[0], &num_cmd_segments_in, "<");
+            // ** search for output specification
+            int o_segment = 0;
+            while (o_segment < 2 && !strchr(cmd_segments_in[o_segment], '>')) o_segment++;
+            // * output char exists
+            if (o_segment<2){
+                char* cmd_segments_out[2]; // ! Assuming at most 1 output request
+                int num_cmd_segments_out;
+                read_tokens(cmd_segments_out, cmd_segments_in[o_segment], &num_cmd_segments_out, ">");
+                if (o_segment==0){
+                    pipe_segments[0] = cmd_segments_out[0];
+                    output_file = strtok(cmd_segments_out[1], SPACE_CHARS);
+                    input_file = strtok(cmd_segments_in[1], SPACE_CHARS);
+                }
+                else {
+                    pipe_segments[0] = cmd_segments_in[0];
+                    output_file = strtok(cmd_segments_out[1], SPACE_CHARS);
+                    input_file = strtok(cmd_segments_out[0], SPACE_CHARS);
+                }
+            }
+            // * not output along with input
+            else {
+                // ! Assuming first segment is command
+                pipe_segments[0] = cmd_segments_in[0];
+                input_file = strtok(cmd_segments_in[1], SPACE_CHARS);
+            }
+        }
+        // ** search for output specification
+        else if (strchr(pipe_segments[0], '>')){
+            char* cmd_segments_out[2]; // ! Assuming at most 1 output request
+            int num_cmd_segments_out;
+            read_tokens(cmd_segments_out, pipe_segments[0], &num_cmd_segments_out, ">");
+            // ! Assuming first segment is command
+            pipe_segments[0] = cmd_segments_out[0];
+            output_file = strtok(cmd_segments_out[1], SPACE_CHARS);
+        }
+    }
+
+    printf("input file: %s\n", input_file);
+    printf("output file: %s\n", output_file);
+    printf("pipe segment: %s\n", pipe_segments[0]);
+
+    int inputfd;
+    if (input_file!=NULL){
+        inputfd = open(input_file, /* output file name */
+                O_RDONLY, /* flag */
+                S_IRUSR | S_IWUSR ); /* user permission: 600 */
+    }
+    else inputfd = STDIN_FILENO;
 
     // ? Set output file for last command
-    int outputfd = STDOUT_FILENO;
+    int outputfd;
+    if (output_file!=NULL){
+        outputfd = open(output_file, /* output file name */
+                O_CREAT | O_WRONLY, /* flag */
+                S_IRUSR | S_IWUSR ); /* user permission: 600 */
+    }
+    else outputfd = STDOUT_FILENO;
+    
+    int prev_pfds[2]; // previous pipe
+    int next_pfds[2]; // next pipe
 
     // * Start pipe loop
     int i;
