@@ -95,6 +95,8 @@ void read_tokens(char **argv, char *line, int *numTokens, char *token);
 
 void print_arr(char **arr, int n);
 
+void execute_segment(char* segment);
+
 
 /* The main function implementation */
 int main()
@@ -145,6 +147,7 @@ void process_cmd(char *cmdline)
     
     int prev_pfds[2]; // previous pipe
     int next_pfds[2]; // next pipe
+
     // * Start pipe loop
     for (int i=0;i<num_pipe_segments;i++){
         printf("Segment num: %i\n", i);
@@ -159,7 +162,9 @@ void process_cmd(char *cmdline)
         */
 
         // * Create next pipe if segment is not last pipe segment
-        if (i!=(num_pipe_segments-1)) pipe(next_pfds);
+        if (i!=(num_pipe_segments-1)){
+            pipe(next_pfds);
+        }
 
         // * Create child to execute segment
         pid_t child_pid = fork();
@@ -184,22 +189,7 @@ void process_cmd(char *cmdline)
             }
             else printf("Previous Pipe in child: %i, %i \n", prev_pfds[0], prev_pfds[1]);
 
-            // * Get arguments
-            char *cmd_args[MAX_ARGUMENTS];
-            int num_args;
-            read_tokens(cmd_args, pipe_segments[i], &num_args, SPACE_CHARS);
-            // print_arr(cmd_args, num_args);
-
-            // * add NULL for exp args
-            char *arguments[MAX_ARGUMENTS_PER_SEGMENT];
-            for (int a=0; a<num_args; a++){
-                arguments[a] = cmd_args[a];
-            }
-            arguments[num_args] = NULL;
-            // print_arr(arguments, num_args+1);
-
-            execvp(arguments[0],arguments);
-            // printf("%s failed",arguments[0]);
+            execute_segment(pipe_segments[i]);
         }
         else {
             //* make next_pipe the prev_pipe
@@ -269,4 +259,23 @@ void print_arr(char **arr, int n){
         printf(arr[i]);
         printf("`\n");
     }
+}
+
+void execute_segment(char* segment){
+    // * Get arguments
+    char *cmd_args[MAX_ARGUMENTS];
+    int num_args;
+    read_tokens(cmd_args, segment, &num_args, SPACE_CHARS);
+    // print_arr(cmd_args, num_args);
+
+    // * add NULL for exp args
+    char *arguments[MAX_ARGUMENTS_PER_SEGMENT];
+    for (int a=0; a<num_args; a++){
+        arguments[a] = cmd_args[a];
+    }
+    arguments[num_args] = NULL;
+    // print_arr(arguments, num_args+1);
+
+    execvp(arguments[0],arguments);
+    // printf("%s failed",arguments[0]);
 }
