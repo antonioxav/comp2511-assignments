@@ -190,16 +190,17 @@ void process_cmd(char *cmdline)
             // * add NULL for exp args
             char *arguments[MAX_ARGUMENTS_PER_SEGMENT];
             for (int a=0; a<num_args; a++){
-                strcpy(arguments[a], cmd_args[a]);
+                arguments[a] = cmd_args[a];
             }
             arguments[num_args] = NULL;
+            // print_arr(arguments, num_args+1);
 
             execvp(arguments[0],arguments);
             // printf("%s failed",arguments[0]);
         }
         else {
             wait(&status);
-            printf("%i",status);
+            printf("%i\n",status);
         }
     }
 
