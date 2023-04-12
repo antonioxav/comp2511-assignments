@@ -2,7 +2,7 @@
 // PA2: Completely Fair Scheduler
 //
 // Your name: Srijan Saxena
-// Your ITSC email:   ssaxenaad@connect.ust.hk
+// Your ITSC email: ssaxenaad@connect.ust.hk
 //
 // Declaration:
 //
@@ -133,12 +133,81 @@ int main()
 
 void init_cfs_process()
 {
-    // TODO: initialize CFS process table
+    // * Init weights, vrtime and remain_time
+    int sum_of_weights = 0;
+    for(int i = 0; i<num_process; i++){
+        process[i].weight = NICE_TO_WEIGHT[nice_value[i] + 20];
+        process[i].vruntime = 0.0;
+        process[i].remain_time = burst_time[i]; // initially, it is equal to the burst_time. This value keeps decreasing until 0
+        
+        sum_of_weights += process[i].weight;
+    }
+    // * Init time slice
+    int calculated_ts;
+    for(int i = 0; i< num_process; i++){
+        calculated_ts = (int) ((double) process[i].weight * sched_latency/sum_of_weights);
+        process[i].time_slice = calculated_ts > min_granularity ? calculated_ts : min_granularity;
+    }
+
+    // * Print Step 0
+    printf(template_cfs_algorithm);
+    printf(template_step_i, 0);
+    print_cfs_process();
 }
 
 void run_cfs_scheduling()
 {
     // TODO: write your CFS algorithm code
+    // * Loop until all processes complete
+    int step = 1;
+    while (finish_process_count!=num_process){
+        // ** Choose next process based on vruntime
+        int cur_process = -1;
+        for (int i = 0; i < num_process; i++){
+            if (process[i].remain_time==0) continue; // Skip completed processes
+            // Choose first process with vruntime=0
+            if (process[i].vruntime==0.0){
+                cur_process = i;
+                break;
+            }
+            // first process is min process by default
+            if (cur_process<0){
+                cur_process = i;
+                continue;
+            } 
+            // find minimum vruntime
+            if (process[i].vruntime < process[cur_process].vruntime)
+                cur_process = i;
+        }
+
+        // ** Update remaining time
+        int runtime;
+        if (process[cur_process].time_slice < process[cur_process].remain_time)
+            runtime = process[cur_process].time_slice;
+        else{
+            runtime = process[cur_process].remain_time;
+            finish_process_count += 1;
+        }
+        printf("runtime: %i",runtime);
+        process[cur_process].remain_time -= runtime;
+
+        // ** Update vruntime
+        process[cur_process].vruntime += (double) DEFAULT_WEIGHT/process[cur_process].weight * runtime;
+
+        // ** Uppdate Gantt Chart
+        if (chart[num_chart_item-1].pid!=cur_process){
+            chart[num_chart_item].pid = cur_process;
+            chart[num_chart_item].duration = runtime;
+            num_chart_item += 1;
+        }
+        else chart[num_chart_item].duration += runtime;
+
+        // ** Print step info
+        printf(template_step_i, step);
+        print_cfs_process();
+
+        step += 1;
+    }
 }
 
 
