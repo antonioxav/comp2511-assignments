@@ -188,19 +188,19 @@ void run_cfs_scheduling()
             runtime = process[cur_process].remain_time;
             finish_process_count += 1;
         }
-        printf("runtime: %i",runtime);
+        // printf("runtime: %i",runtime);
         process[cur_process].remain_time -= runtime;
 
         // ** Update vruntime
         process[cur_process].vruntime += (double) DEFAULT_WEIGHT/process[cur_process].weight * runtime;
 
         // ** Uppdate Gantt Chart
-        if (chart[num_chart_item-1].pid!=cur_process){
+        if (num_chart_item==0 || chart[num_chart_item-1].pid!=cur_process){
             chart[num_chart_item].pid = cur_process;
             chart[num_chart_item].duration = runtime;
             num_chart_item += 1;
         }
-        else chart[num_chart_item].duration += runtime;
+        else chart[num_chart_item-1].duration += runtime;
 
         // ** Print step info
         printf(template_step_i, step);
