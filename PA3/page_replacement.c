@@ -216,9 +216,36 @@ void frames_init()
         frames[i] = UNFILLED_FRAME;
 }
 
+// * Queue Implementation
+struct Queue {
+    int q[MAX_FRAMES_AVAILABLE];
+    int front, rear, capacity;
+};
+
+void qEnqueue(Queue q, int data){
+    if (q.capacity==q.rear){
+        printf("error: queue full");
+        return;
+    }
+    q.q[q.rear++] = data;
+    return;
+}
+
+void qDequeue(Queue q){
+    if (q.front == q.read){
+        printf("error: queue empty");
+        return;
+    }
+    for (int i=1; i < q.rear; ++i){
+        q.q[i-1] = q.q[i];
+    }
+    q.rear--;
+}
+
 void FIFO_replacement()
 {
     // TODO: Implement FIFO replacement here
+
 }
 
 void OPT_replacement()
@@ -234,6 +261,8 @@ void LRU_replacement()
 void CLOCK_replacement()
 {
     // TODO: Implement CLOCK replacement here
+    // ? if in frame: set sc=1
+    // ? else cycle through frames, set all sc=0 until find sc==0, move pointer
 }
 
 int main()
