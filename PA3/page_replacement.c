@@ -226,6 +226,7 @@ Queue new_queue(int capacity){
     Queue queue;
     queue.capacity = capacity;
     queue.rear = 0;
+    return queue;
 }
 
 void qEnqueue(Queue q, int data){
@@ -234,8 +235,7 @@ void qEnqueue(Queue q, int data){
         return;
     }
     printf("%d\n", q.q[0]);
-    q.q[q.rear] = data;
-    q.rear++;
+    q.q[q.rear++] = data;
     printf("%d\n", q.q[0]);
     fflush(stdout);
     return;
