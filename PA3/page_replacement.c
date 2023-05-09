@@ -256,6 +256,7 @@ void FIFO_replacement()
     // TODO: Implement FIFO replacement here
     Queue queue = new_queue(frames_available);
     int faults = 0;
+    printf("FIFO init");
 
     for (int ref = 0; ref < reference_string_length; ++ref){
 
@@ -269,6 +270,8 @@ void FIFO_replacement()
             }
         }
         if (f<frames_available) continue;
+
+        printf("Page not in frames: %d", f);
 
         // * Page not in memory
         faults++;
