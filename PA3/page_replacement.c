@@ -286,7 +286,7 @@ void FIFO_replacement()
         f = 0;
         while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
         // printf("Empty Frame: %d\n", f);
-        fflush(stdout);
+        // fflush(stdout);
 
         // if empty frame not found, select page to remove
         if (f == frames_available){
@@ -311,6 +311,59 @@ void FIFO_replacement()
 void OPT_replacement()
 {
     // TODO: Implement OPT replacement here
+    int faults = 0;
+
+    for (int ref = 0; ref < reference_string_length; ++ref){
+        
+        int cur_page = reference_string[ref];
+        // Search if page already in memory
+        int f = 0;
+        for (; f<frames_available; f++){
+            if (frames[f] == cur_page){
+                printf(template_no_page_fault, cur_page);
+                break;
+            }
+        }
+        if (f<frames_available) continue;
+
+        // * Page not in memory
+        faults++;
+
+        // Find empty frame
+        f = 0;
+        while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
+
+        // if empty frame not found, select page to remove
+        if (f == frames_available){
+            // ? iter through frames, find & store first occurance of each?
+            int next_use[frames_available];
+            for (int i=0; i<frames_available; i++){
+                int j = ref+1;
+                for (; j<reference_string_length; j++){
+                    if (reference_string[j]==frames[i]){
+                        next_use[i] = j;
+                        break;
+                    }
+                }
+                if (j==reference_string_length) next_use[i]=reference_string_length;
+            }
+
+            // ? find latest max occurance
+            f = 0;
+            for (int i=1; i<frames_available; i++){
+                if (next_use[i] >= next_use[f]){
+                    if(next_use[i]>next_use[f] || frames[i]<frames[f]){
+                        f = i;
+                    }
+                }
+            }
+        }
+
+        // load page
+        frames[f] = cur_page;
+        display_fault_frame(cur_page);
+
+    }
 }
 
 void LRU_replacement()
