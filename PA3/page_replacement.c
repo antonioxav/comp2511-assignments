@@ -371,12 +371,15 @@ void LRU_replacement()
 {
     // TODO: Implement LRU replacement here
     int counter[MAX_FRAMES_AVAILABLE];
+    for (int i=0; i<MAX_FRAMES_AVAILABLE; i++){
+        counter[i]=-1;
+    }
     int faults = 0;
 
     for (int ref = 0; ref < reference_string_length; ++ref){
 
-        // for (int j=0; j<MAX_FRAMES_AVAILABLE; j++) printf("%d ", counter[j]);
-        // printf("\n");
+        for (int j=0; j<MAX_FRAMES_AVAILABLE; j++) printf("%d ", counter[j]);
+        printf("\n");
         
         int cur_page = reference_string[ref];
         // Search if page already in memory
@@ -402,6 +405,7 @@ void LRU_replacement()
             // ? search counter for each frame and select lowest
             f = 0;
             for (int i = 1; i<frames_available; ++i){
+                if (counter[frames[i]]<0) prinf("error: inccorect frame access\n");
                 if (counter[frames[i]] < counter[frames[i]]) f = i;
             }
         }
