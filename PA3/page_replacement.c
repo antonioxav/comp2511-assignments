@@ -234,9 +234,9 @@ void qEnqueue(Queue* q, int data){
         printf("error: queue full");
         return;
     }
-    printf("%d\n", q->q[0]);
+    // printf("%d\n", q->q[0]);
     q->q[q->rear++] = data;
-    printf("%d\n", q->q[0]);
+    // printf("%d\n", q->q[0]);
     fflush(stdout);
     return;
 }
@@ -258,12 +258,12 @@ int qDequeue(Queue* q){
 void FIFO_replacement()
 {
     // TODO: Implement FIFO replacement here
-    printf("hello\n");
+    // printf("hello\n");
     Queue queue;
     queue.capacity = frames_available;
     queue.rear = 0;
     int faults = 0;
-    printf("FIFO init\n");
+    // printf("FIFO init\n");
 
     for (int ref = 0; ref < reference_string_length; ++ref){
 
@@ -278,14 +278,14 @@ void FIFO_replacement()
         }
         if (f<frames_available) continue;
 
-        printf("Page not in frames: %d\n", f);
+        // printf("Page not in frames: %d\n", f);
         // * Page not in memory
         faults++;
 
         // Find empty frame
         f = 0;
         while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
-        printf("Empty Frame: %d\n", f);
+        // printf("Empty Frame: %d\n", f);
         fflush(stdout);
 
         // if empty frame not found, select page to remove
