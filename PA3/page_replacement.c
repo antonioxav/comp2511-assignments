@@ -217,10 +217,16 @@ void frames_init()
 }
 
 // * Queue Implementation
-struct Queue {
+typedef struct Queue {
     int q[MAX_FRAMES_AVAILABLE];
-    int front, rear, capacity;
-};
+    int rear, capacity;
+} Queue;
+
+Queue new_queue(int capacity){
+    Queue queue;
+    queue.capacity = capacity;
+    queue.rear = 0;
+}
 
 void qEnqueue(Queue q, int data){
     if (q.capacity==q.rear){
@@ -231,21 +237,61 @@ void qEnqueue(Queue q, int data){
     return;
 }
 
-void qDequeue(Queue q){
-    if (q.front == q.read){
+int qDequeue(Queue q){
+    if (q.rear == 0){
         printf("error: queue empty");
-        return;
+        return -1;
     }
+
+    int data = q.q[0];
     for (int i=1; i < q.rear; ++i){
         q.q[i-1] = q.q[i];
     }
     q.rear--;
+    return data;
 }
 
 void FIFO_replacement()
 {
     // TODO: Implement FIFO replacement here
+    Queue queue = new_queue(frames_available);
+    int faults = 0;
 
+    for (int ref = 0; ref < reference_string_length; ++ref){
+
+        // Search if page already in memory
+        for (int f = 0; f<frames_available; f++){
+            if (frames[f] == ref){
+                printf(template_no_page_fault, ref);
+                continue;
+            }
+        }
+
+        // * Page not in memory
+        faults++;
+
+        // Find empty frame
+        int f = 0;
+        while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
+
+        // if empty frame not found, page fault
+        if (f == frames_available){
+            //pop first item in queue
+            int page = qDequeue(queue);
+            // find which frame the page currently occupies
+            f = 0;
+            while (f < frames_available && frames[f]!=page) ++f;
+            if (f == frames_available) printf("error: page not found in frame");
+        }
+
+        // load page
+        frames[f] = ref;
+        qEnqueue(queue, ref);
+
+        display_fault_frame(ref);
+    }
+
+    printf(template_total_page_fault, faults);
 }
 
 void OPT_replacement()
