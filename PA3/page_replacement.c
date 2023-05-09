@@ -405,7 +405,7 @@ void LRU_replacement()
             // ? search counter for each frame and select lowest
             f = 0;
             for (int i = 1; i<frames_available; ++i){
-                if (counter[frames[i]]<0) prinf("error: inccorect frame access\n");
+                if (counter[frames[i]]<0) printf("error: inccorect frame access\n");
                 if (counter[frames[i]] < counter[frames[i]]) f = i;
             }
         }
