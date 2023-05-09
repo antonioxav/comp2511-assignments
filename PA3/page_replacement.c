@@ -376,6 +376,7 @@ void LRU_replacement()
     for (int ref = 0; ref < reference_string_length; ++ref){
 
         for (int j=0; j<MAX_FRAMES_AVAILABLE; j++) printf("%d ", counter[j]);
+        printf("\n");
         
         int cur_page = reference_string[ref];
         // Search if page already in memory
