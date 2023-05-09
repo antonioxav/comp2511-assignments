@@ -222,36 +222,36 @@ typedef struct Queue {
     int rear, capacity;
 } Queue;
 
-Queue new_queue(int capacity){
+Queue* new_queue(int capacity){
     Queue queue;
     queue.capacity = capacity;
     queue.rear = 0;
-    return queue;
+    return &queue;
 }
 
-void qEnqueue(Queue q, int data){
-    if (q.capacity==q.rear){
+void qEnqueue(Queue* q, int data){
+    if (q->capacity==q->rear){
         printf("error: queue full");
         return;
     }
-    printf("%d\n", q.q[0]);
-    q.q[q.rear++] = data;
-    printf("%d\n", q.q[0]);
+    printf("%d\n", q->q[0]);
+    q->q[q->rear++] = data;
+    printf("%d\n", q->q[0]);
     fflush(stdout);
     return;
 }
 
-int qDequeue(Queue q){
-    if (q.rear == 0){
+int qDequeue(Queue* q){
+    if (q->rear == 0){
         printf("error: queue empty");
         return -1;
     }
 
-    int data = q.q[0];
-    for (int i=1; i < q.rear; ++i){
-        q.q[i-1] = q.q[i];
+    int data = q->q[0];
+    for (int i=1; i < q->rear; ++i){
+        q->q[i-1] = q->q[i];
     }
-    q.rear--;
+    q->rear--;
     return data;
 }
 
@@ -259,7 +259,7 @@ void FIFO_replacement()
 {
     // TODO: Implement FIFO replacement here
     printf("hello\n");
-    Queue queue = new_queue(frames_available);
+    Queue* queue = new_queue(frames_available);
     int faults = 0;
     printf("FIFO init\n");
 
