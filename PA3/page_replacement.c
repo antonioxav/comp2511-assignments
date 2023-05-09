@@ -254,6 +254,7 @@ int qDequeue(Queue q){
 void FIFO_replacement()
 {
     // TODO: Implement FIFO replacement here
+    printf("hello");
     Queue queue = new_queue(frames_available);
     int faults = 0;
     printf("FIFO init");
