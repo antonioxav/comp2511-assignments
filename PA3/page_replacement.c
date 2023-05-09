@@ -259,11 +259,12 @@ void FIFO_replacement()
 
     for (int ref = 0; ref < reference_string_length; ++ref){
 
+        int cur_page = reference_string[ref];
         // Search if page already in memory
         int f = 0;
         for (; f<frames_available; f++){
-            if (frames[f] == ref){
-                printf(template_no_page_fault, ref);
+            if (frames[f] == cur_page){
+                printf(template_no_page_fault, cur_page);
                 break;
             }
         }
@@ -288,10 +289,10 @@ void FIFO_replacement()
         }
 
         // load page
-        frames[f] = ref;
-        qEnqueue(queue, ref);
+        frames[f] = cur_page;
+        qEnqueue(queue, cur_page);
 
-        display_fault_frame(ref);
+        display_fault_frame(cur_page);
     }
 
     printf(template_total_page_fault, faults);
