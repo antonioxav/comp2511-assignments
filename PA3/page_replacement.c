@@ -362,8 +362,9 @@ void OPT_replacement()
         // load page
         frames[f] = cur_page;
         display_fault_frame(cur_page);
-
     }
+    
+    printf(template_total_page_fault, faults);
 }
 
 void LRU_replacement()
