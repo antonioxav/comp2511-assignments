@@ -234,7 +234,8 @@ void qEnqueue(Queue q, int data){
         return;
     }
     printf("%d\n", q.q[0]);
-    q.q[q.rear++] = data;
+    q.q[q.rear] = data;
+    q.rear++;
     printf("%d\n", q.q[0]);
     fflush(stdout);
     return;
