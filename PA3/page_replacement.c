@@ -260,21 +260,24 @@ void FIFO_replacement()
     for (int ref = 0; ref < reference_string_length; ++ref){
 
         // Search if page already in memory
-        for (int f = 0; f<frames_available; f++){
+        int f = 0;
+        for (; f<frames_available; f++){
             if (frames[f] == ref){
                 printf(template_no_page_fault, ref);
-                continue;
+                break;
             }
         }
+        if (f<frames_available) continue;
 
         // * Page not in memory
         faults++;
 
         // Find empty frame
-        int f = 0;
+        f = 0;
         while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
+        printf("Empty Frame: %d", f);
 
-        // if empty frame not found, page fault
+        // if empty frame not found, select page to remove
         if (f == frames_available){
             //pop first item in queue
             int page = qDequeue(queue);
