@@ -370,6 +370,46 @@ void OPT_replacement()
 void LRU_replacement()
 {
     // TODO: Implement LRU replacement here
+    int counter[MAX_FRAMES_AVAILABLE];
+    int faults = 0;
+
+    for (int ref = 0; ref < reference_string_length; ++ref){
+        
+        int cur_page = reference_string[ref];
+        // Search if page already in memory
+        int f = 0;
+        for (; f<frames_available; f++){
+            if (frames[f] == cur_page){
+                printf(template_no_page_fault, cur_page);
+                counter[cur_page] = ref;
+                break;
+            }
+        }
+        if (f<frames_available) continue;
+
+        // * Page not in memory
+        faults++;
+
+        // Find empty frame
+        f = 0;
+        while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
+
+        // if empty frame not found, select page to remove
+        if (f == frames_available){
+            // ? search counter for each frame and select lowest
+            f = 0;
+            for (int i = 1; i<frames_available; ++i){
+                if (counter[i] < counter[f]) f = i;
+            }
+        }
+
+        // load page
+        frames[f] = cur_page;
+        counter[cur_page] = ref;
+        display_fault_frame(cur_page);
+    }
+    
+    printf(template_total_page_fault, faults);
 }
 
 void CLOCK_replacement()
