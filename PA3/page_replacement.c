@@ -233,9 +233,9 @@ void qEnqueue(Queue q, int data){
         printf("error: queue full");
         return;
     }
-    printf(q.q[0]);
+    printf("%d\n", q.q[0]);
     q.q[q.rear++] = data;
-    printf(q.q[0]);
+    printf("%d\n", q.q[0]);
     fflush(stdout);
     return;
 }
