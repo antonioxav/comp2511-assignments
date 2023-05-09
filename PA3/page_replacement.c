@@ -273,7 +273,6 @@ void FIFO_replacement()
         if (f<frames_available) continue;
 
         printf("Page not in frames: %d", f);
-        fflush(stdout);
         // * Page not in memory
         faults++;
 
@@ -281,6 +280,7 @@ void FIFO_replacement()
         f = 0;
         while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
         printf("Empty Frame: %d", f);
+        fflush(stdout);
 
         // if empty frame not found, select page to remove
         if (f == frames_available){
