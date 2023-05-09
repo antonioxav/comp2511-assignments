@@ -406,10 +406,7 @@ void LRU_replacement()
             f = 0;
             for (int i = 1; i<frames_available; ++i){
                 if (counter[frames[i]]<0) printf("error: inccorect frame access\n");
-                if (counter[frames[i]] < counter[frames[i]]){
-                    f = i;
-                    printf("new_f: %d ");
-                } 
+                if (counter[frames[i]] < counter[frames[f]]) f=i;
             }
             printf("\n");
         }
