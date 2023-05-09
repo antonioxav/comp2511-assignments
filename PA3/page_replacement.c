@@ -425,6 +425,54 @@ void CLOCK_replacement()
     // TODO: Implement CLOCK replacement here
     // ? if in frame: set sc=1
     // ? else cycle through frames, set all sc=0 until find sc==0, move pointer
+
+    int sc[frames_available];
+    for (int i=0; i<frames_available; i++){
+        sc[i]=0;
+    }
+    int ptr = 0;
+    int faults = 0;
+
+    for (int ref = 0; ref < reference_string_length; ++ref){
+
+        // for (int j=0; j<MAX_FRAMES_AVAILABLE; j++) printf("%d ", counter[j]);
+        // printf("\n");
+        
+        int cur_page = reference_string[ref];
+        // Search if page already in memory
+        int f = 0;
+        for (; f<frames_available; f++){
+            if (frames[f] == cur_page){
+                sc[f] = 1;
+                printf(template_no_page_fault, cur_page);
+                break;
+            }
+        }
+        if (f<frames_available) continue;
+
+        // * Page not in memory
+        faults++;
+
+        // Find empty frame
+        f = 0;
+        while (f < frames_available && frames[f]!=UNFILLED_FRAME) ++f;
+
+        // if empty frame not found, select page to remove
+        if (f == frames_available){
+            while(sc[ptr]!=0){
+                sc[ptr] = 0;
+                ptr = (ptr+1)%frames_available;
+            }
+            f = ptr;
+        }
+
+        // load page
+        frames[f] = cur_page;
+        ptr = (ptr+1)%frames_available;
+        display_fault_frame(cur_page);
+    }
+    
+    printf(template_total_page_fault, faults);
 }
 
 int main()
