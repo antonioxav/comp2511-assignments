@@ -222,12 +222,12 @@ typedef struct Queue {
     int rear, capacity;
 } Queue;
 
-Queue* new_queue(int capacity){
-    Queue queue;
-    queue.capacity = capacity;
-    queue.rear = 0;
-    return &queue;
-}
+// void new_queue(Queue* queue, int capacity){
+//     Queue queue;
+//     queue.capacity = capacity;
+//     queue.rear = 0;
+//     return &queue;
+// }
 
 void qEnqueue(Queue* q, int data){
     if (q->capacity==q->rear){
@@ -259,7 +259,9 @@ void FIFO_replacement()
 {
     // TODO: Implement FIFO replacement here
     printf("hello\n");
-    Queue* queue = new_queue(frames_available);
+    Queue queue;
+    queue.capacity = frames_available;
+    queue.rear = 0;
     int faults = 0;
     printf("FIFO init\n");
 
@@ -289,7 +291,7 @@ void FIFO_replacement()
         // if empty frame not found, select page to remove
         if (f == frames_available){
             //pop first item in queue
-            int page = qDequeue(queue);
+            int page = qDequeue(&queue);
             // find which frame the page currently occupies
             f = 0;
             while (f < frames_available && frames[f]!=page) ++f;
@@ -298,7 +300,7 @@ void FIFO_replacement()
 
         // load page
         frames[f] = cur_page;
-        qEnqueue(queue, cur_page);
+        qEnqueue(&queue, cur_page);
 
         display_fault_frame(cur_page);
     }
