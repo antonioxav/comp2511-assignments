@@ -1,0 +1,12 @@
+# Page replacement algorithm
+# Empty lines and lines starting with '#' are ignored
+
+algorithm = OPT
+
+frames_available = 3
+
+reference_string_length = 15
+
+reference_string = 7 2 3 1 2 5 3 4 6 7 7 1 0 5 4
+
+
